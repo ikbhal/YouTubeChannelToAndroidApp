@@ -1,0 +1,173 @@
+package com.muhammed.iqbal.vivekbindra;
+
+import android.app.AlertDialog;
+import android.content.Context;
+import android.content.DialogInterface;
+import android.content.Intent;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
+import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
+import android.view.Menu;
+import android.view.MenuItem;
+import android.widget.Toast;
+
+import com.google.api.client.extensions.android.http.AndroidHttp;
+import com.google.api.client.http.HttpTransport;
+import com.google.api.client.json.gson.GsonFactory;
+import com.google.api.services.youtube.YouTube;
+//import com.google.android.gms.ads.MobileAds;
+//import com.google.android.gms.ads.AdRequest;
+//import com.google.android.gms.ads.AdView;
+
+/**
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ * <p/>
+ * http://www.apache.org/licenses/LICENSE-2.0
+ * <p/>
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+public class YouTubeActivity extends AppCompatActivity {
+    private static final String[] YOUTUBE_PLAYLISTS = {
+            // vivek bindra one play  list
+            "PLOxBmXq4mdMPyTWsnc1MXuE_JJsJAQ87H",
+
+            "PLWz5rJ2EKKc_Tt7q77qwyKRgytF1RzRx8",
+            "PLWz5rJ2EKKc9CBxr3BVjPTPoDPLdPIFCE",
+            "PLWz5rJ2EKKc_XOgcRukSoKKjewFJZrKV0",
+            "PLWz5rJ2EKKc-lJo_RGGXL2Psr8vVCTWjM",
+            "PLWz5rJ2EKKc9ofd2f-_-xmUi07wIGZa1c",
+            "PLWz5rJ2EKKc-riD21lnOjVYBqSkNII3_k"
+    };
+    private YouTube mYoutubeDataApi;
+    private final GsonFactory mJsonFactory = new GsonFactory();
+    private final HttpTransport mTransport = AndroidHttp.newCompatibleTransport();
+    //private AdView mAdView;
+
+    @Override
+    protected void onCreate(Bundle savedInstanceState) {
+        super.onCreate(savedInstanceState);
+        setContentView(com.muhammed.iqbal.vivekbindra.R.layout.youtube_activity);
+
+        // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
+        //TODO create admob app , use it here
+        //MobileAds.initialize(this, "YOUR_ADMOB_APP_ID");
+        /*
+        MobileAds.initialize(this, "ca-app-pub-3940256099942544~3347511713");
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        /*
+import com.google.android.gms.ads.InterstitialAd;
+
+        mInterstitialAd = new InterstitialAd(this);
+        mInterstitialAd.setAdUnitId("ca-app-pub-3940256099942544/1033173712");
+
+        mInterstitialAd.loadAd(new AdRequest.Builder().build());
+
+        //
+        mMyButton.setOnClickListener(new View.OnClickListener() {
+    @Override
+    public void onClick(View v) {
+        if (mInterstitialAd.isLoaded()) {
+            mInterstitialAd.show();
+        } else {
+            Log.d("TAG", "The interstitial wasn't loaded yet.");
+        }
+    }
+});
+//
+mInterstitialAd.setAdListener(new AdListener() {
+    @Override
+    public void onAdLoaded() {
+        // Code to be executed when an ad finishes loading.
+    }
+
+    @Override
+    public void onAdFailedToLoad(int errorCode) {
+        // Code to be executed when an ad request fails.
+    }
+
+    @Override
+    public void onAdOpened() {
+        // Code to be executed when the ad is displayed.
+    }
+
+    @Override
+    public void onAdLeftApplication() {
+        // Code to be executed when the user has left the app.
+    }
+
+    @Override
+    public void onAdClosed() {
+        // Code to be executed when when the interstitial ad is closed.
+    }
+});
+         */
+
+        if(!isConnected()){
+            Toast.makeText(YouTubeActivity.this,"No Internet Connection Detected",Toast.LENGTH_LONG).show();
+        }
+        
+        if (ApiKey.YOUTUBE_API_KEY.startsWith("YOUR_API_KEY")) {
+            AlertDialog.Builder builder = new AlertDialog.Builder(this)
+                .setMessage("Edit ApiKey.java and replace \"YOUR_API_KEY\" with your Applications Browser API Key")
+                        .setTitle("Missing API Key")
+                        .setNeutralButton("Ok, I got it!", new DialogInterface.OnClickListener() {
+                            @Override
+                            public void onClick(DialogInterface dialogInterface, int i) {
+                                finish();
+                            }
+                        });
+
+            AlertDialog dialog = builder.create();
+            dialog.show();
+
+        } else if (savedInstanceState == null) {
+            mYoutubeDataApi = new YouTube.Builder(mTransport, mJsonFactory, null)
+                    .setApplicationName(getResources().getString(com.muhammed.iqbal.vivekbindra.R.string.app_name))
+                    .build();
+
+            getSupportFragmentManager().beginTransaction()
+                    .add(com.muhammed.iqbal.vivekbindra.R.id.container, YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS))
+                    .commit();
+        }
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+
+        // Inflate the menu; this adds items to the action bar if it is present.
+        getMenuInflater().inflate(com.muhammed.iqbal.vivekbindra.R.menu.main_menu, menu);
+        return true;
+    }
+    
+    public boolean isConnected() {
+        ConnectivityManager cm =
+            (ConnectivityManager) getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo netInfo = cm.getActiveNetworkInfo();
+        return netInfo != null && netInfo.isConnectedOrConnecting();
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        // Handle action bar item clicks here. The action bar will
+        // automatically handle clicks on the Home/Up button, so long
+        // as you specify a parent activity in AndroidManifest.xml.
+        int id = item.getItemId();
+        if (id == R.id.action_recyclerview) {
+            getSupportFragmentManager().beginTransaction()
+                    .replace(R.id.container, YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS))
+                    .commit();
+            return true;
+        }
+        return super.onOptionsItemSelected(item);
+    }
+}
