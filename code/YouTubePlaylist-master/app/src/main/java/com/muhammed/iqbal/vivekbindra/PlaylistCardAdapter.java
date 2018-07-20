@@ -42,27 +42,27 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final Context mContext;
         public final TextView mTitleText;
-        public final TextView mDescriptionText;
+        //public final TextView mDescriptionText;
         public final ImageView mThumbnailImage;
-        public final ImageView mShareIcon;
-        public final TextView mShareText;
-        public final TextView mDurationText;
-        public final TextView mViewCountText;
-        public final TextView mLikeCountText;
-        public final TextView mDislikeCountText;
+        //public final ImageView mShareIcon;
+        //public final TextView mShareText;
+        //public final TextView mDurationText;
+        //public final TextView mViewCountText;
+        //public final TextView mLikeCountText;
+        //public final TextView mDislikeCountText;
 
         public ViewHolder(View v) {
             super(v);
             mContext = v.getContext();
-            mTitleText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_title);
-            mDescriptionText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_description);
-            mThumbnailImage = (ImageView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_thumbnail);
-            mShareIcon = (ImageView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_share);
-            mShareText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_share_text);
-            mDurationText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_dutation_text);
-            mViewCountText= (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_view_count);
-            mLikeCountText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_like_count);
-            mDislikeCountText = (TextView) v.findViewById(com.muhammed.iqbal.vivekbindra.R.id.video_dislike_count);
+            mTitleText = (TextView) v.findViewById(R.id.video_title);
+            //mDescriptionText = (TextView) v.findViewById(R.id.video_description);
+            mThumbnailImage = (ImageView) v.findViewById(R.id.video_thumbnail);
+            //mShareIcon = (ImageView) v.findViewById(R.id.video_share);
+            //mShareText = (TextView) v.findViewById(R.id.video_share_text);
+            //mDurationText = (TextView) v.findViewById(R.id.video_dutation_text);
+            //mViewCountText= (TextView) v.findViewById(R.id.video_view_count);
+            //mLikeCountText = (TextView) v.findViewById(R.id.video_like_count);
+            //mDislikeCountText = (TextView) v.findViewById(R.id.video_dislike_count);
         }
     }
 
@@ -75,7 +75,7 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
     @Override
     public PlaylistCardAdapter.ViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         // inflate a card layout
-        View v = LayoutInflater.from(parent.getContext()).inflate(com.muhammed.iqbal.vivekbindra.R.layout.youtube_video_card, parent, false);
+        View v = LayoutInflater.from(parent.getContext()).inflate(R.layout.youtube_video_card, parent, false);
         // populate the viewholder
         ViewHolder vh = new ViewHolder(v);
         return vh;
@@ -94,12 +94,12 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
         final VideoStatistics videoStatistics = video.getStatistics();
 
         holder.mTitleText.setText(videoSnippet.getTitle());
-        holder.mDescriptionText.setText(videoSnippet.getDescription());
+        //holder.mDescriptionText.setText(videoSnippet.getDescription());
 
         // load the video thumbnail image
         Picasso.with(holder.mContext)
                 .load(videoSnippet.getThumbnails().getHigh().getUrl())
-                .placeholder(com.muhammed.iqbal.vivekbindra.R.drawable.video_placeholder)
+                .placeholder(R.drawable.video_placeholder)
                 .into(holder.mThumbnailImage);
 
         // set the click listener to play the video
@@ -122,15 +122,15 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
                 holder.mContext.startActivity(sendIntent);
             }
         };
-        holder.mShareIcon.setOnClickListener(shareClickListener);
-        holder.mShareText.setOnClickListener(shareClickListener);
+        //holder.mShareIcon.setOnClickListener(shareClickListener);
+        //holder.mShareText.setOnClickListener(shareClickListener);
 
         // set the video duration text
-        holder.mDurationText.setText(parseDuration(videoContentDetails.getDuration()));
+        //holder.mDurationText.setText(parseDuration(videoContentDetails.getDuration()));
         // set the video statistics
-        holder.mViewCountText.setText(sFormatter.format(videoStatistics.getViewCount()));
-        holder.mLikeCountText.setText(sFormatter.format(videoStatistics.getLikeCount()));
-        holder.mDislikeCountText.setText(sFormatter.format(videoStatistics.getDislikeCount()));
+        //holder.mViewCountText.setText(sFormatter.format(videoStatistics.getViewCount()));
+        //holder.mLikeCountText.setText(sFormatter.format(videoStatistics.getLikeCount()));
+        //holder.mDislikeCountText.setText(sFormatter.format(videoStatistics.getDislikeCount()));
 
         if (mListener != null) {
             // get the next playlist page if we're at the end of the current page and we have another page to get

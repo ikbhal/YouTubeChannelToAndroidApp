@@ -11,10 +11,6 @@ import android.util.Pair;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.AdapterView;
-import android.widget.ArrayAdapter;
-import android.widget.Spinner;
-
 import com.muhammed.iqbal.vivekbindra.model.PlaylistVideos;
 import com.google.api.services.youtube.YouTube;
 import com.google.api.services.youtube.model.PlaylistListResponse;
@@ -22,7 +18,6 @@ import com.google.api.services.youtube.model.Video;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -45,15 +40,12 @@ import java.util.List;
 public class YouTubeRecyclerViewFragment extends Fragment {
     // the fragment initialization parameter
     private static final String ARG_YOUTUBE_PLAYLIST_IDS = "YOUTUBE_PLAYLIST_IDS";
-    private static final int SPINNER_ITEM_LAYOUT_ID = android.R.layout.simple_spinner_item;
-    private static final int SPINNER_ITEM_DROPDOWN_LAYOUT_ID = android.R.layout.simple_spinner_dropdown_item;
 
-    private String[] mPlaylistIds;
+    public String[] mPlaylistIds;
     private ArrayList<String> mPlaylistTitles;
     private RecyclerView mRecyclerView;
-    private PlaylistVideos mPlaylistVideos;
+    public PlaylistVideos mPlaylistVideos;
     private RecyclerView.LayoutManager mLayoutManager;
-    private Spinner mPlaylistSpinner;
     private PlaylistCardAdapter mPlaylistCardAdapter;
     private YouTube mYouTubeDataApi;
     private ProgressDialog mProgressDialog;
@@ -111,10 +103,6 @@ public class YouTubeRecyclerViewFragment extends Fragment {
                 for (com.google.api.services.youtube.model.Playlist playlist : playlistListResponse.getItems()) {
                     mPlaylistTitles.add(playlist.getSnippet().getTitle());
                 }
-                // update the spinner adapter with the titles of the playlists
-                ArrayAdapter<List<String>> spinnerAdapter = new ArrayAdapter(getContext(), android.R.layout.simple_spinner_item, mPlaylistTitles);
-                spinnerAdapter.setDropDownViewResource(SPINNER_ITEM_DROPDOWN_LAYOUT_ID);
-                mPlaylistSpinner.setAdapter(spinnerAdapter);
                 mProgressDialog.hide();
             }
         }.execute(mPlaylistIds);
@@ -145,9 +133,6 @@ public class YouTubeRecyclerViewFragment extends Fragment {
         //mProgressDialog = new ProgressDialog(getContext());
 
         mRecyclerView.setLayoutManager(mLayoutManager);
-
-        mPlaylistSpinner = (Spinner)rootView.findViewById(com.muhammed.iqbal.vivekbindra.R.id.youtube_playlist_spinner);
-
         return rootView;
     }
 
@@ -166,34 +151,9 @@ public class YouTubeRecyclerViewFragment extends Fragment {
             reloadUi(mPlaylistVideos, true);
         }
 
-        ArrayAdapter<List<String>> spinnerAdapter;
-        // if we don't have the playlist titles yet
-        if (mPlaylistTitles == null || mPlaylistTitles.isEmpty()) {
-            // initialize the spinner with the playlist ID's so that there's something in the UI until the GetPlaylistTitlesAsyncTask finishes
-            spinnerAdapter = new ArrayAdapter(getContext(), SPINNER_ITEM_LAYOUT_ID, Arrays.asList(mPlaylistIds));
-        } else {
-            // otherwise use the playlist titles for the spinner
-            spinnerAdapter = new ArrayAdapter(getContext(), SPINNER_ITEM_LAYOUT_ID, mPlaylistTitles);
-        }
-
-        spinnerAdapter.setDropDownViewResource(SPINNER_ITEM_DROPDOWN_LAYOUT_ID);
-        mPlaylistSpinner.setAdapter(spinnerAdapter);
-
-        // set up the onItemSelectedListener for the spinner
-        mPlaylistSpinner.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                // reload the UI with the playlist video list of the selected playlist
-                mPlaylistVideos = new PlaylistVideos(mPlaylistIds[position]);
-                reloadUi(mPlaylistVideos, true);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
     }
 
-    private void reloadUi(final PlaylistVideos playlistVideos, boolean fetchPlaylist) {
+    public void reloadUi(final PlaylistVideos playlistVideos, boolean fetchPlaylist) {
         // initialize the cards adapter
         initCardAdapter(playlistVideos);
 

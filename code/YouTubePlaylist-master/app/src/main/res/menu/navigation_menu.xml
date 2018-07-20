@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+<menu xmlns:android="http://schemas.android.com/apk/res/android">
+    <group>
+        <item android:id="@+id/motivational_videos"
+            android:title="Motivational Videos"/>
+        <item android:id="@+id/motivational_2_videos"
+            android:title="Motivational 2 Videos"/>
+        <item android:id="@+id/inspirational_videos"
+            android:title="Inspirational Videos"/>
+        <item android:id="@+id/leadership_videos"
+            android:title="Leadership Videos"/>
+        <item android:id="@+id/double_your_sales"
+            android:title="Double Your Sales"/>
+        <item android:id="@+id/team_building"
+            android:title="Team Building"/>
+        <item android:id="@+id/sales_training"
+            android:title="Sales training"/>
+        <item android:id="@+id/managerial_effectiveness"
+            android:title="Managerial Effectiveness"/>
+        <item android:id="@+id/management_principles"
+            android:title="Management Principles"/>
+        <item android:id="@+id/time_management_videos"
+            android:title="Time Management Videos"/>
+    </group>
+    <group>
+        <item android:id="@+id/social_media"
+            android:title="Social Media"/>
+        <item android:id="@+id/facebook"
+            android:title="Facebook" />
+        <item android:id="@+id/instagram"
+            android:title="Instagram" />
+    </group>
+    <group>
+        <item android:id="@+id/other"
+            android:title="Other"/>
+        <item android:id="@+id/contact_us"
+            android:title="Contact Us" />
+    </group>
+</menu>
