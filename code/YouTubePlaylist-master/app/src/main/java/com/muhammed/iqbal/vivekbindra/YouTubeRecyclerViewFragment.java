@@ -1,9 +1,11 @@
 package com.muhammed.iqbal.vivekbindra;
 
+import android.annotation.SuppressLint;
 import android.content.res.Resources;
 import android.app.ProgressDialog;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.StaggeredGridLayoutManager;
@@ -49,7 +51,7 @@ public class YouTubeRecyclerViewFragment extends Fragment {
     private PlaylistCardAdapter mPlaylistCardAdapter;
     private YouTube mYouTubeDataApi;
     private ProgressDialog mProgressDialog;
-
+    private FragmentActivity mActivity;
 
     /**
      * Use this factory method to create a new instance of
@@ -59,8 +61,8 @@ public class YouTubeRecyclerViewFragment extends Fragment {
      * @param playlistIds A String array of YouTube Playlist IDs
      * @return A new instance of fragment YouTubeRecyclerViewFragment.
      */
-    public static YouTubeRecyclerViewFragment newInstance(YouTube youTubeDataApi, String[] playlistIds) {
-        YouTubeRecyclerViewFragment fragment = new YouTubeRecyclerViewFragment();
+    public static YouTubeRecyclerViewFragment newInstance(YouTube youTubeDataApi, String[] playlistIds, FragmentActivity activity) {
+        YouTubeRecyclerViewFragment fragment = new YouTubeRecyclerViewFragment(activity);
         Bundle args = new Bundle();
         args.putStringArray(ARG_YOUTUBE_PLAYLIST_IDS, playlistIds);
         fragment.setArguments(args);
@@ -70,6 +72,12 @@ public class YouTubeRecyclerViewFragment extends Fragment {
 
     public YouTubeRecyclerViewFragment() {
         // Required empty public constructor
+    }
+
+    @SuppressLint("ValidFragment")
+    public YouTubeRecyclerViewFragment(FragmentActivity activity) {
+        super();
+        this.mActivity = activity;
     }
 
     public void setYouTubeDataApi(YouTube api) {
@@ -90,7 +98,8 @@ public class YouTubeRecyclerViewFragment extends Fragment {
             @Override
             protected void onPreExecute() {
                 super.onPreExecute();
-                mProgressDialog.show();
+                if(mProgressDialog != null)
+                    mProgressDialog.show();
             }
             
             @Override
@@ -180,11 +189,11 @@ public class YouTubeRecyclerViewFragment extends Fragment {
                     }
                 }.execute(playlistVideos.playlistId, playlistVideos.getNextPageToken());
             }
-        });
+        }, mActivity);
         mRecyclerView.setAdapter(mPlaylistCardAdapter);
     }
 
-    private void handleGetPlaylistResult(PlaylistVideos playlistVideos, Pair<String, List<Video>> result) {
+    private void  handleGetPlaylistResult(PlaylistVideos playlistVideos, Pair<String, List<Video>> result) {
         if (result == null) return;
         final int positionStart = playlistVideos.size();
         playlistVideos.setNextPageToken(result.first);

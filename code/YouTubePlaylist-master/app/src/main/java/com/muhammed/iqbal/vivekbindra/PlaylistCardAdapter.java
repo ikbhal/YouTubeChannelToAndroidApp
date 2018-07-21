@@ -3,18 +3,22 @@ package com.muhammed.iqbal.vivekbindra;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.support.design.widget.Snackbar;
+import android.support.v4.app.FragmentActivity;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
+import com.google.api.services.youtube.model.VideoContentDetails;
+import com.google.api.services.youtube.model.VideoStatistics;
 import com.muhammed.iqbal.vivekbindra.model.PlaylistVideos;
 import com.google.api.services.youtube.model.Video;
-import com.google.api.services.youtube.model.VideoContentDetails;
 import com.google.api.services.youtube.model.VideoSnippet;
-import com.google.api.services.youtube.model.VideoStatistics;
+import com.muhammed.iqbal.vivekbindra.utils.Utils;
 import com.squareup.picasso.Picasso;
 
 import java.text.DecimalFormat;
@@ -38,37 +42,25 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
     private static final DecimalFormat sFormatter = new DecimalFormat("#,###,###");
     private final PlaylistVideos mPlaylistVideos;
     private final YouTubeRecyclerViewFragment.LastItemReachedListener mListener;
+    private FragmentActivity mActivity;
 
     public static class ViewHolder extends RecyclerView.ViewHolder {
         public final Context mContext;
         public final TextView mTitleText;
-        //public final TextView mDescriptionText;
         public final ImageView mThumbnailImage;
-        //public final ImageView mShareIcon;
-        //public final TextView mShareText;
-        //public final TextView mDurationText;
-        //public final TextView mViewCountText;
-        //public final TextView mLikeCountText;
-        //public final TextView mDislikeCountText;
 
         public ViewHolder(View v) {
             super(v);
             mContext = v.getContext();
             mTitleText = (TextView) v.findViewById(R.id.video_title);
-            //mDescriptionText = (TextView) v.findViewById(R.id.video_description);
             mThumbnailImage = (ImageView) v.findViewById(R.id.video_thumbnail);
-            //mShareIcon = (ImageView) v.findViewById(R.id.video_share);
-            //mShareText = (TextView) v.findViewById(R.id.video_share_text);
-            //mDurationText = (TextView) v.findViewById(R.id.video_dutation_text);
-            //mViewCountText= (TextView) v.findViewById(R.id.video_view_count);
-            //mLikeCountText = (TextView) v.findViewById(R.id.video_like_count);
-            //mDislikeCountText = (TextView) v.findViewById(R.id.video_dislike_count);
         }
     }
 
-    public PlaylistCardAdapter(PlaylistVideos playlistVideos, YouTubeRecyclerViewFragment.LastItemReachedListener lastItemReachedListener) {
+    public PlaylistCardAdapter(PlaylistVideos playlistVideos, YouTubeRecyclerViewFragment.LastItemReachedListener lastItemReachedListener, FragmentActivity activity) {
         mPlaylistVideos = playlistVideos;
         mListener = lastItemReachedListener;
+        this.mActivity = activity;
     }
 
     // Create new views (invoked by the layout manager)
@@ -90,11 +82,8 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
 
         final Video video = mPlaylistVideos.get(position);
         final VideoSnippet videoSnippet = video.getSnippet();
-        final VideoContentDetails videoContentDetails = video.getContentDetails();
-        final VideoStatistics videoStatistics = video.getStatistics();
 
         holder.mTitleText.setText(videoSnippet.getTitle());
-        //holder.mDescriptionText.setText(videoSnippet.getDescription());
 
         // load the video thumbnail image
         Picasso.with(holder.mContext)
@@ -106,36 +95,40 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
         holder.mThumbnailImage.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                holder.mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=" + video.getId())));
+                //holder.mContext.startActivity(new Intent(Intent.ACTION_VIEW, Uri.parse("https://www.youtube.com/watch?v=" + video.getId())));
+
+                //VideoFragment videoFragment = new VideoFragment(video);
+                //mActivity.getSupportFragmentManager().beginTransaction()
+                 //       .replace(R.id.container, videoFragment)
+                 //       .commit();
+                //Toast.makeText(mActivity, "open video activity", Toast.LENGTH_LONG).show();
+                Intent intent = new Intent(mActivity, VideoActivity.class);
+                final VideoSnippet videoSnippet = video.getSnippet();
+                final VideoContentDetails videoContentDetails = video.getContentDetails();
+                final VideoStatistics videoStatistics = video.getStatistics();
+
+                intent.putExtra("id", video.getId());
+                intent.putExtra("title", videoSnippet.getTitle());
+                intent.putExtra("description", videoSnippet.getDescription());
+                intent.putExtra("url", videoSnippet.getThumbnails().getHigh().getUrl());
+                intent.putExtra("duration", videoContentDetails.getDuration());
+                intent.putExtra("view",videoStatistics.getViewCount().toString());
+                intent.putExtra("like", videoStatistics.getLikeCount().toString());
+                intent.putExtra("dislike", videoStatistics.getDislikeCount().toString());
+                mActivity.startActivity(intent);
+                //intent.putExtaStrin("title", video.getTitle());
+                //videoActivityIntent.putExtra("video", video);
+
+                holder.mContext.startActivity(intent);
+                //Snackbar snackbar = Snackbar.make(mActivity, "Open Video Activity", Snackbar.LENGTH_LONG);
+                //snackbar.show();
             }
         });
-
-        // create and set the click listener for both the share icon and share text
-        View.OnClickListener shareClickListener = new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                Intent sendIntent = new Intent();
-                sendIntent.setAction(Intent.ACTION_SEND);
-                sendIntent.putExtra(Intent.EXTRA_SUBJECT, "Watch \"" + videoSnippet.getTitle() + "\" on YouTube");
-                sendIntent.putExtra(Intent.EXTRA_TEXT, "https://www.youtube.com/watch?v=" + video.getId());
-                sendIntent.setType("text/plain");
-                holder.mContext.startActivity(sendIntent);
-            }
-        };
-        //holder.mShareIcon.setOnClickListener(shareClickListener);
-        //holder.mShareText.setOnClickListener(shareClickListener);
-
-        // set the video duration text
-        //holder.mDurationText.setText(parseDuration(videoContentDetails.getDuration()));
-        // set the video statistics
-        //holder.mViewCountText.setText(sFormatter.format(videoStatistics.getViewCount()));
-        //holder.mLikeCountText.setText(sFormatter.format(videoStatistics.getLikeCount()));
-        //holder.mDislikeCountText.setText(sFormatter.format(videoStatistics.getDislikeCount()));
 
         if (mListener != null) {
             // get the next playlist page if we're at the end of the current page and we have another page to get
             final String nextPageToken = mPlaylistVideos.getNextPageToken();
-            if (!isEmpty(nextPageToken) && position == mPlaylistVideos.size() - 1) {
+            if (!Utils.isEmpty(nextPageToken) && position == mPlaylistVideos.size() - 1) {
                 holder.itemView.post(new Runnable() {
                     @Override
                     public void run() {
@@ -151,42 +144,5 @@ public class PlaylistCardAdapter extends RecyclerView.Adapter<PlaylistCardAdapte
         return mPlaylistVideos.size();
     }
 
-    private boolean isEmpty(String s) {
-        if (s == null || s.length() == 0) {
-            return true;
-        }
-        return false;
-    }
 
-    private String parseDuration(String in) {
-        boolean hasSeconds = in.indexOf('S') > 0;
-        boolean hasMinutes = in.indexOf('M') > 0;
-
-        String s;
-        if (hasSeconds) {
-            s = in.substring(2, in.length() - 1);
-        } else {
-            s = in.substring(2, in.length());
-        }
-
-        String minutes = "0";
-        String seconds = "00";
-
-        if (hasMinutes && hasSeconds) {
-            String[] split = s.split("M");
-            minutes = split[0];
-            seconds = split[1];
-        } else if (hasMinutes) {
-            minutes = s.substring(0, s.indexOf('M'));
-        } else if (hasSeconds) {
-            seconds = s;
-        }
-
-        // pad seconds with a 0 if less than 2 digits
-        if (seconds.length() == 1) {
-            seconds = "0" + seconds;
-        }
-
-        return minutes + ":" + seconds;
-    }
 }

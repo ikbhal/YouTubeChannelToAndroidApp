@@ -1,13 +1,19 @@
 package com.muhammed.iqbal.vivekbindra;
 
 import android.app.AlertDialog;
+import android.arch.lifecycle.Observer;
+import android.arch.lifecycle.ViewModelProviders;
 import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.net.ConnectivityManager;
 import android.net.NetworkInfo;
+import android.net.Uri;
 import android.os.Bundle;
+import android.preference.PreferenceManager;
 import android.support.annotation.NonNull;
+import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
 import android.support.v4.view.GravityCompat;
 import android.support.v4.widget.DrawerLayout;
@@ -23,13 +29,13 @@ import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
 import com.google.api.services.youtube.YouTube;
+import com.google.api.services.youtube.model.Video;
+import com.muhammed.iqbal.vivekbindra.db.VideoViewModel;
 import com.muhammed.iqbal.vivekbindra.model.PlaylistVideos;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
-//import com.google.android.gms.ads.MobileAds;
-//import com.google.android.gms.ads.AdRequest;
-//import com.google.android.gms.ads.AdView;
 
 /**
  * Licensed under the Apache License, Version 2.0 (the "License");
@@ -58,7 +64,7 @@ public class YouTubeActivity extends AppCompatActivity {
             "PLOxBmXq4mdMNbRWUxO32Ge188bdQSMlNR", // Management principles
             "PLOxBmXq4mdMPtPgeO0MxzznHzM9juoB1x" // Time Management Videos
     };
-    int[] NAV_ITEM_IDS = {R.id.motivational_videos, R.id.leadership_videos, R.id.double_your_sales,
+    public static final int[] NAV_ITEM_IDS = {R.id.motivational_videos, R.id.leadership_videos, R.id.double_your_sales,
             R.id.motivational_2_videos, R.id.team_building, R.id.inspirational_videos,
             R.id.sales_training, R.id.managerial_effectiveness, R.id.management_principles,
             R.id.time_management_videos};
@@ -73,11 +79,40 @@ public class YouTubeActivity extends AppCompatActivity {
     private ActionBarDrawerToggle t;
     private NavigationView nv;
     private YouTubeRecyclerViewFragment youTubeRecyclerViewFragment;
+    public static String FACEBOOK_URL = "https://www.facebook.com/DailyMotivationByVivekBindra";
+    public static String FACEBOOK_PAGE_ID = "DailyMotivationByVivekBindra";
 
+    private VideoViewModel mVideoViewModel;
+
+    //method to get the right URL to use in the intent
+    public String getFacebookPageURL(Context context) {
+        PackageManager packageManager = context.getPackageManager();
+        try {
+            int versionCode = packageManager.getPackageInfo("com.facebook.katana", 0).versionCode;
+            if (versionCode >= 3002850) { //newer versions of fb app
+                return "fb://facewebmodal/f?href=" + FACEBOOK_URL;
+            } else { //older versions of fb app
+                return "fb://page/" + FACEBOOK_PAGE_ID;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            return FACEBOOK_URL; //normal web url
+        }
+    }
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.youtube_activity);
+
+        PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
+
+        mVideoViewModel = ViewModelProviders.of(this).get(VideoViewModel.class);
+        mVideoViewModel.getAllVideos().observe(this, new Observer<List<com.muhammed.iqbal.vivekbindra.model.Video>>() {
+            @Override
+            public void onChanged(@Nullable final List<com.muhammed.iqbal.vivekbindra.model.Video> videos) {
+                // Update the cached copy of the words in the adapter.
+                //adapter.setWords(words);
+            }
+        });
 
         // map navigation item to play list id
         for(int i =0; i < NAV_ITEM_IDS.length; i++) {
@@ -96,13 +131,30 @@ public class YouTubeActivity extends AppCompatActivity {
                 new NavigationView.OnNavigationItemSelectedListener() {
                     @Override
                     public boolean onNavigationItemSelected(@NonNull MenuItem item) {
-                        // reload the UI with the playlist video list of the selected playlist
-                        String playListId  = navItemToPlayListIdMap.get(item.getItemId());
-                        if(playListId != null) {
-                            youTubeRecyclerViewFragment.mPlaylistVideos = new PlaylistVideos(playListId);
-                            youTubeRecyclerViewFragment.reloadUi(youTubeRecyclerViewFragment.mPlaylistVideos, true);
-                        }else {
-                            Toast.makeText(YouTubeActivity.this, "Wrong navigation item clicked or need to implement yet", Toast.LENGTH_LONG).show();
+
+                        switch(item.getItemId()) {
+                            case R.id.contact_us:
+                                Intent emailIntent = new Intent(Intent.ACTION_SENDTO);
+                                emailIntent.setData(Uri.parse("mailto:iqbalforall@gmail.com"));
+                                YouTubeActivity.this.startActivity(emailIntent);
+                                break;
+                            case R.id.facebook:
+                                Intent facebookIntent = new Intent(Intent.ACTION_VIEW);
+                                String facebookUrl = getFacebookPageURL(getApplicationContext());
+                                facebookIntent.setData(Uri.parse(facebookUrl));
+                                startActivity(facebookIntent);
+                                break;
+                            default:
+                            // reload the UI with the playlist video list of the selected playlist
+                            String playListId = navItemToPlayListIdMap.get(item.getItemId());
+                            if (playListId != null) {
+                                youTubeRecyclerViewFragment.mPlaylistVideos = new PlaylistVideos(playListId);
+                                youTubeRecyclerViewFragment.reloadUi(youTubeRecyclerViewFragment.mPlaylistVideos, true);
+
+                            } else {
+                                Toast.makeText(YouTubeActivity.this, "Wrong navigation item clicked or need to implement yet", Toast.LENGTH_LONG).show();
+                            }
+
                         }
                         dl.closeDrawers();
                         return true;
@@ -131,7 +183,7 @@ public class YouTubeActivity extends AppCompatActivity {
             mYoutubeDataApi = new YouTube.Builder(mTransport, mJsonFactory, null)
                     .setApplicationName(getResources().getString(R.string.app_name))
                     .build();
-            youTubeRecyclerViewFragment = YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS);
+            youTubeRecyclerViewFragment = YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS, this);
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, youTubeRecyclerViewFragment)
                     .commit();
@@ -160,11 +212,20 @@ public class YouTubeActivity extends AppCompatActivity {
         // as you specify a parent activity in AndroidManifest.xml.
         switch(item.getItemId()) {
             case  R.id.action_recyclerview :
-                youTubeRecyclerViewFragment = YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS);
+                youTubeRecyclerViewFragment = YouTubeRecyclerViewFragment.newInstance(mYoutubeDataApi, YOUTUBE_PLAYLISTS, this);
                 getSupportFragmentManager().beginTransaction()
                         .replace(R.id.container, youTubeRecyclerViewFragment)
                         .commit();
                 return true;
+                //action_favorites
+            case R.id.action_favorites:
+                Intent intent = new Intent(this, FavoriteActivity.class);
+                startActivity(intent);
+                break;
+            case R.id.settings:
+                intent = new Intent(this, SettingsActivity.class);
+                startActivity(intent);
+                break;
             case android.R.id.home:
                 dl.openDrawer(GravityCompat.START);
                 return true;

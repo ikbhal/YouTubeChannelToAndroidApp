@@ -3,8 +3,18 @@
     xmlns:tools="http://schemas.android.com/tools"
     tools:context=".YouTubeActivity" >
 
+    <item android:id="@+id/action_favorites"
+        android:title="Favorites"
+        android:orderInCategory="101"
+        app:showAsAction="never" />
+
     <item android:id="@+id/action_recyclerview"
         android:title="@string/action_recycler_view"
         android:orderInCategory="101"
         app:showAsAction="never" />
+
+    <item android:id="@+id/settings"
+        android:title="Settings"
+        android:orderInCategory="101"
+        app:showAsAction="never"/>
 </menu>
