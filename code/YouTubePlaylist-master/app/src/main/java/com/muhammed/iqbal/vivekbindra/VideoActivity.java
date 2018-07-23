@@ -50,10 +50,16 @@ public class VideoActivity extends AppCompatActivity {
         mVideoViewModel = ViewModelProviders.of(this).get(VideoViewModel.class);
 
         Toolbar toolbar = findViewById(R.id.toolbar);
+        toolbar.setNavigationIcon(android.support.v7.appcompat.R.drawable.abc_ic_ab_back_material);
+        toolbar.setNavigationOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                Toast.makeText(VideoActivity.this, "back clicked in vidoe activity", Toast.LENGTH_LONG).show();
+                finish();
+            }
+        });
         setSupportActionBar(toolbar);
-        ActionBar actionBar = getSupportActionBar();
-        actionBar.setDisplayHomeAsUpEnabled(true);
-        actionBar.setHomeAsUpIndicator(R.drawable.ic_menu);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
         FloatingActionButton fab = findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {

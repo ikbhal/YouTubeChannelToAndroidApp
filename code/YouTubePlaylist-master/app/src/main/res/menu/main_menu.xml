@@ -9,7 +9,7 @@
         app:showAsAction="never" />
 
     <item android:id="@+id/action_recyclerview"
-        android:title="@string/action_recycler_view"
+        android:title="Refresh"
         android:orderInCategory="101"
         app:showAsAction="never" />
 

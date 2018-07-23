@@ -125,7 +125,7 @@ public class YouTubeRecyclerViewFragment extends Fragment {
         // Inflate the layout for this fragment
         View rootView = inflater.inflate(com.muhammed.iqbal.vivekbindra.R.layout.youtube_recycler_view_fragment, container, false);
 
-        mRecyclerView = (RecyclerView) rootView.findViewById(com.muhammed.iqbal.vivekbindra.R.id.youtube_recycler_view);
+        mRecyclerView = rootView.findViewById(com.muhammed.iqbal.vivekbindra.R.id.youtube_recycler_view);
         // use this setting to improve performance if you know that changes
         // in content do not change the layout size of the RecyclerView
         mRecyclerView.setHasFixedSize(true);

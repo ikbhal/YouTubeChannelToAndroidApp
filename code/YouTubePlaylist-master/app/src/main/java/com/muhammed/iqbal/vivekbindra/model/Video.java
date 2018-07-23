@@ -2,6 +2,7 @@ package com.muhammed.iqbal.vivekbindra.model;
 
 import android.arch.persistence.room.ColumnInfo;
 import android.arch.persistence.room.Entity;
+import android.arch.persistence.room.Ignore;
 import android.arch.persistence.room.PrimaryKey;
 import android.support.annotation.NonNull;
 
@@ -26,10 +27,12 @@ public class Video {
 
     public Video(){}
 
+    @Ignore
     public Video(String title) {
         super();
         this.title = title;
     }
+    @Ignore
     public Video(String youTubeId, String title, String description, String url){
         super();
         this.youTubeId = youTubeId;

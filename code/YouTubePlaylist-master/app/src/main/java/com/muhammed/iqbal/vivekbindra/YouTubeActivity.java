@@ -12,6 +12,7 @@ import android.net.NetworkInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.preference.PreferenceManager;
+import android.provider.Settings;
 import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.support.design.widget.NavigationView;
@@ -21,10 +22,14 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.ActionBarDrawerToggle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.Toast;
 
+import com.google.android.gms.ads.AdRequest;
+import com.google.android.gms.ads.AdView;
+import com.google.android.gms.ads.MobileAds;
 import com.google.api.client.extensions.android.http.AndroidHttp;
 import com.google.api.client.http.HttpTransport;
 import com.google.api.client.json.gson.GsonFactory;
@@ -33,6 +38,8 @@ import com.google.api.services.youtube.model.Video;
 import com.muhammed.iqbal.vivekbindra.db.VideoViewModel;
 import com.muhammed.iqbal.vivekbindra.model.PlaylistVideos;
 
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -84,6 +91,8 @@ public class YouTubeActivity extends AppCompatActivity {
 
     private VideoViewModel mVideoViewModel;
 
+    private AdView mAdView;
+
     //method to get the right URL to use in the intent
     public String getFacebookPageURL(Context context) {
         PackageManager packageManager = context.getPackageManager();
@@ -98,10 +107,42 @@ public class YouTubeActivity extends AppCompatActivity {
             return FACEBOOK_URL; //normal web url
         }
     }
+
+    public String md5(String s) {
+        try {
+            // Create MD5 Hash
+            MessageDigest digest = java.security.MessageDigest.getInstance("MD5");
+            digest.update(s.getBytes());
+            byte messageDigest[] = digest.digest();
+
+            // Create Hex String
+            StringBuffer hexString = new StringBuffer();
+            for (int i=0; i<messageDigest.length; i++)
+                hexString.append(Integer.toHexString(0xFF & messageDigest[i]));
+            return hexString.toString();
+
+        } catch (NoSuchAlgorithmException e) {
+            e.printStackTrace();
+        }
+        return "";
+    }
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.youtube_activity);
+
+        // Sample AdMob app ID: ca-app-pub-3940256099942544~3347511713
+        // vivke bindra viedeos ca-app-pub-7893979407683638~7527829360
+        MobileAds.initialize(this, AdmobKey.appId);
+
+        mAdView = findViewById(R.id.adView);
+        AdRequest adRequest = new AdRequest.Builder().build();
+        mAdView.loadAd(adRequest);
+
+        String android_id = Settings.Secure.getString(this.getContentResolver(), Settings.Secure.ANDROID_ID);
+        String deviceId = md5(android_id).toUpperCase();
+        Log.i("device id=",deviceId);
 
         PreferenceManager.setDefaultValues(this, R.xml.preferences, false);
 
